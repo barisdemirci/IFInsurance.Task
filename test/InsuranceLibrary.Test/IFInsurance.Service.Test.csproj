@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.5.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\business\Insurance.Common\IFInsurance.Common.csproj" />
+    <ProjectReference Include="..\..\business\Insurance.Service\IFInsurance.Service.csproj" />
+    <ProjectReference Include="..\..\business\InsuranceLibrary\IFInsurance.Library.csproj" />
+    <ProjectReference Include="..\Insurance.ObjectBuilder\IFInsurance.ObjectBuilder.csproj" />
+  </ItemGroup>
+
+</Project>
