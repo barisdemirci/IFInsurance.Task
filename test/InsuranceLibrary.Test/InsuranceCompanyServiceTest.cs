@@ -13,12 +13,6 @@ namespace IFInsurance.Service.Test
 {
     public class InsuranceCompanyServiceTest
     {
-        // You can update list of available risks at any time.
-        // You can sell policy with initial list of risks.
-        // You can add or remove risks at any moment within policy period.
-        // Premium must be calculated according to risk validity period.
-        // There could be several policies with the same insured object name, but different effective date
-
         InsuranceCompanyService insuranceCompanyService;
         private readonly IPolicyService policyService;
 
@@ -47,6 +41,12 @@ namespace IFInsurance.Service.Test
                 RiskBuilder.Build("Risk 2", 10)
             };
             insuranceCompanyService.AvailableRisks = availableRisks;
+        }
+
+        [Fact]
+        public void Constructor_ArgsNull_ThrowsException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new InsuranceCompanyService(null));
         }
 
         [Fact]

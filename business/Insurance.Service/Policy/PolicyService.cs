@@ -13,6 +13,11 @@ namespace IFInsurance.Service.Policy
         public PolicyService()
         {
             policies = new List<IPolicy>();
+            Risk risk = new Risk()
+            {
+                Name = "Risk 1",
+                YearlyPrice = 100
+            };
             policies.Add(new PolicyA()
             {
                 NameOfInsuredObject = "Policy 1",
@@ -20,11 +25,17 @@ namespace IFInsurance.Service.Policy
                 ValidTill = DateTime.UtcNow.AddYears(1),
                 InsuredRisks = new List<Risk>()
                 {
-                    new Risk()
-                    {
-                        Name = "Risk 1",
-                        YearlyPrice = 100
-                    }
+                    risk
+                }
+            });
+            policies.Add(new PolicyA()
+            {
+                NameOfInsuredObject = "Policy 2",
+                ValidFrom = DateTime.UtcNow,
+                ValidTill = DateTime.UtcNow.AddYears(1),
+                InsuredRisks = new List<Risk>()
+                {
+                    risk
                 }
             });
         }

@@ -33,6 +33,20 @@ namespace IFInsurance.Service.Test
         }
 
         [Fact]
+        public void GetPolicy_ArgsOk_ReturnsPolicyObject()
+        {
+            // arrange
+            string nameOfInsuredObject = "Policy 2";
+            DateTime effectiveDate = DateTime.UtcNow;
+
+            // act
+            var result = policyService.GetPolicy(nameOfInsuredObject, effectiveDate);
+
+            // assert
+            result.Should().NotBeNull();
+        }
+
+        [Fact]
         public void SellPolicy_NameOfInsuredObjectIsNotUnique_ThrowsPolicyUniqueNameException()
         {
             // arrange
@@ -54,6 +68,21 @@ namespace IFInsurance.Service.Test
 
             // act && assert
             Assert.Throws<PolicyStartDateException>(() => policyService.SellPolicy(nameOfInsuredObject, validFrom, validMonths, Arg.Any<IList<Risk>>()));
+        }
+
+        [Fact]
+        public void SellPolicy_ArgsOk_ReturnsNewPolicyObject()
+        {
+            // arrange
+            DateTime validFrom = DateTime.UtcNow.AddDays(1);
+            string nameOfInsuredObject = "insurance";
+            short validMonths = 10;
+
+            // act
+            var result = policyService.SellPolicy(nameOfInsuredObject, validFrom, validMonths, Arg.Any<IList<Risk>>());
+
+            // assert
+            result.Should().NotBeNull();
         }
 
         [Fact]
