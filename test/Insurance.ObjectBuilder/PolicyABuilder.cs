@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using IFInsurance.Service;
 using IFInsurance.Library;
 
 namespace IFInsurance.ObjectBuilder
 {
-    public static class PolicyBuilder
+    public static class PolicyABuilder
     {
-        public static Policy Build(DateTime validFrom, DateTime validTill, List<Risk> insuredRisks, string nameOfInsuredObject = "insurance")
+        public static PolicyA Build(DateTime validFrom, DateTime validTill, List<Risk> insuredRisks, string nameOfInsuredObject = "insurance")
         {
-            Policy policy = new Policy()
+            PolicyA policy = new PolicyA()
             {
                 NameOfInsuredObject = nameOfInsuredObject,
                 ValidFrom = validFrom,

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace IFInsurance.Library
 {
-    public class Policy : IPolicy
+    public class PolicyA : IPolicy
     {
         public string NameOfInsuredObject { get; set; }
         public DateTime ValidFrom { get; set; }

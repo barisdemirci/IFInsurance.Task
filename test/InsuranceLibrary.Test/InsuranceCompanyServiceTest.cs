@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using IFInsurance.Common.Exceptions;
 using IFInsurance.Library;
 using IFInsurance.ObjectBuilder;
-using IFInsurance.Service;
+using IFInsurance.Service.Policy;
 using NSubstitute;
 using Xunit;
 
-namespace InsuranceLibrary.Test
+namespace IFInsurance.Service.Test
 {
-    public class InsuranceLibraryTest
+    public class InsuranceCompanyServiceTest
     {
         // You can update list of available risks at any time.
         // You can sell policy with initial list of risks.
@@ -19,7 +20,7 @@ namespace InsuranceLibrary.Test
         // There could be several policies with the same insured object name, but different effective date
 
         InsuranceCompanyService insuranceCompanyService;
-        private readonly IPolicy policy;
+        private readonly IPolicyService policyService;
 
         public static IEnumerable<object[]> SellPolicyParameters
         {
@@ -34,10 +35,18 @@ namespace InsuranceLibrary.Test
             }
         }
 
-        public InsuranceLibraryTest()
+        public InsuranceCompanyServiceTest()
         {
-            policy = Substitute.For<IPolicy>();
-            insuranceCompanyService = new InsuranceCompanyService(policy);
+            policyService = Substitute.For<IPolicyService>();
+            insuranceCompanyService = new InsuranceCompanyService(policyService);
+
+            // set availableRisks
+            List<Risk> availableRisks = new List<Risk>()
+            {
+                RiskBuilder.Build("Risk 1", 100),
+                RiskBuilder.Build("Risk 2", 10)
+            };
+            insuranceCompanyService.AvailableRisks = availableRisks;
         }
 
         [Fact]
@@ -110,6 +119,8 @@ namespace InsuranceLibrary.Test
                 }
             };
             DateTime expectedValidTill = validFrom.AddMonths(validMonths);
+            PolicyA policy = PolicyABuilder.Build(validFrom, expectedValidTill, insuranceCompanyService.AvailableRisks.ToList(), nameOfInsuranceObject);
+            policyService.SellPolicy(nameOfInsuranceObject, validFrom, validMonths, selectedRisks).Returns(policy);
 
             // act
             var result = insuranceCompanyService.SellPolicy(nameOfInsuranceObject, validFrom, validMonths, selectedRisks);
@@ -117,16 +128,13 @@ namespace InsuranceLibrary.Test
             // assert
             // it would be better if I have a chance to mock it
             result.Should().NotBeNull();
-            result.InsuredRisks.Should().BeEquivalentTo(selectedRisks);
-            result.ValidFrom.Should().Be(validFrom);
-            result.ValidTill.Should().Be(expectedValidTill);
-            result.NameOfInsuredObject.Should().Be(nameOfInsuranceObject);
+            result.Should().BeEquivalentTo(policy);
         }
 
         [Theory]
         [InlineData("name of insurance", null)]
         [InlineData(null, "new risk name")]
-        public void AddRisk_NameOfInsuranceObjectIsNull_ThrowsException(string nameOfInsuranceObject, string newRiskName)
+        public void AddRisk_ArgsAreInvalid_ThrowsException(string nameOfInsuranceObject, string newRiskName)
         {
             // arrange
             Risk risk = new Risk()
@@ -163,36 +171,25 @@ namespace InsuranceLibrary.Test
         {
             // arrange
             string nameOfInsuranceObject = "Policy 1";
-            Risk risk = new Risk()
-            {
-                Name = "New Risk",
-                YearlyPrice = 50
-            };
+            Risk newRisk = RiskBuilder.Build("New Risk", 50);
             DateTime validFrom = DateTime.UtcNow;
             DateTime effectiveDate = DateTime.UtcNow;
-            List<Risk> availableRisks = new List<Risk>()
-            {
-                new Risk()
-                {
-                    Name = "Risk",
-                    YearlyPrice = 100
-                }
-            };
-            insuranceCompanyService.AvailableRisks = availableRisks;
-            policy.InsuredRisks = new List<Risk>();
+            PolicyA policy = PolicyABuilder.Build(validFrom, effectiveDate, insuranceCompanyService.AvailableRisks.ToList());
+            policyService.GetPolicy(nameOfInsuranceObject, effectiveDate).Returns(policy);
+            int expectedCountOfRisk = insuranceCompanyService.AvailableRisks.Count + 1;
 
             // act
-            insuranceCompanyService.AddRisk(nameOfInsuranceObject, risk, validFrom, effectiveDate);
+            insuranceCompanyService.AddRisk(nameOfInsuranceObject, newRisk, validFrom, effectiveDate);
 
             // assert
-            policy.InsuredRisks.Count.Should().Be(1);
-            policy.InsuredRisks.Should().Contain(risk);
+            policy.InsuredRisks.Count.Should().Be(expectedCountOfRisk);
+            policy.InsuredRisks.Should().Contain(newRisk);
         }
 
         [Theory]
         [InlineData("name of insurance", null)]
         [InlineData(null, "risk name")]
-        public void RemoveRisk(string nameOfInsuranceObject, string riskName)
+        public void RemoveRisk_ArgsAreInvalid_ThrowsException(string nameOfInsuranceObject, string riskName)
         {
             // arrange
             // arrange
@@ -213,29 +210,19 @@ namespace InsuranceLibrary.Test
         {
             // arrange
             string nameOfInsuranceObject = "name";
-            Risk risk = new Risk()
-            {
-                Name = "New Risk",
-                YearlyPrice = 50
-            };
+            Risk risk = RiskBuilder.Build("Risk 1", 100);
             DateTime validFrom = DateTime.UtcNow;
             DateTime effectiveDate = DateTime.UtcNow;
-            List<Risk> availableRisks = new List<Risk>()
-            {
-                new Risk()
-                {
-                    Name = "Risk",
-                    YearlyPrice = 100
-                }
-            };
-            insuranceCompanyService.AvailableRisks = availableRisks;
+            PolicyA policy = PolicyABuilder.Build(validFrom, effectiveDate, insuranceCompanyService.AvailableRisks.ToList(), nameOfInsuranceObject);
+            policyService.GetPolicy(nameOfInsuranceObject, effectiveDate).Returns(policy);
+            int expectedRiskCount = insuranceCompanyService.AvailableRisks.Count - 1;
 
             // act
             insuranceCompanyService.RemoveRisk(nameOfInsuranceObject, risk, validFrom, effectiveDate);
 
             // assert
-            insuranceCompanyService.AvailableRisks.Count.Should().Be(0);
-            insuranceCompanyService.AvailableRisks.Should().Contain(risk);
+            policy.InsuredRisks.Count.Should().Be(expectedRiskCount);
+            policy.InsuredRisks.Contains(risk).Should().BeFalse();
         }
 
         [Fact]
@@ -250,9 +237,9 @@ namespace InsuranceLibrary.Test
                 new Risk() { Name= "Risk 1", YearlyPrice = 100},
                 new Risk() { Name= "Risk 2", YearlyPrice = 100}
             };
-            Policy policy = PolicyBuilder.Build(validFrom, validTill, risks, nameOfInsuranceObject);
+            PolicyA policy = PolicyABuilder.Build(validFrom, validTill, risks, nameOfInsuranceObject);
             decimal expectedPremium = 200;
-            
+
             // assert
             policy.Premium.Should().Be(expectedPremium);
         }
@@ -265,7 +252,7 @@ namespace InsuranceLibrary.Test
             DateTime validTill = DateTime.UtcNow.AddYears(1);
             string nameOfInsuranceObject = "nameOfInsuranceObject";
             List<Risk> risks = null;
-            Policy policy = PolicyBuilder.Build(validFrom, validTill, risks, nameOfInsuranceObject);
+            PolicyA policy = PolicyABuilder.Build(validFrom, validTill, risks, nameOfInsuranceObject);
             decimal expectedPremium = 0;
 
             // assert
