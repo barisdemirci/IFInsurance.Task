@@ -54,6 +54,7 @@ namespace IFInsurance.Service
         public IPolicy GetPolicy(string nameOfInsuredObject, DateTime effectiveDate)
         {
             if (string.IsNullOrEmpty(nameOfInsuredObject)) throw new ArgumentNullException(nameof(nameOfInsuredObject));
+
             return policyService.GetPolicy(nameOfInsuredObject, effectiveDate);
         }
 
@@ -61,6 +62,8 @@ namespace IFInsurance.Service
         {
             if (string.IsNullOrEmpty(nameOfInsuredObject)) throw new ArgumentNullException(nameof(nameOfInsuredObject));
             if (string.IsNullOrEmpty(risk.Name)) throw new ArgumentNullException(nameof(risk.Name));
+            if (effectiveDate.Date > validTill.Date) throw new RiskValidTillException("Must be equal to or greater than date when risk become active");
+
             var policy = policyService.GetPolicy(nameOfInsuredObject, effectiveDate);
             policy.InsuredRisks.Remove(risk);
         }
