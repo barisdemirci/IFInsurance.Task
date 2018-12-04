@@ -19,6 +19,33 @@ namespace IFInsurance.Service.Test
         public PolicyServiceTest()
         {
             policyService = new PolicyService();
+            // mock data
+            Risk risk = new Risk()
+            {
+                Name = "Risk 1",
+                YearlyPrice = 100
+            };
+            policyService.Policies = new List<IPolicy>();
+            policyService.Policies.Add(new PolicyA()
+            {
+                NameOfInsuredObject = "Policy 1",
+                ValidFrom = DateTime.UtcNow,
+                ValidTill = DateTime.UtcNow.AddYears(1),
+                InsuredRisks = new List<Risk>()
+                {
+                    risk
+                }
+            });
+            policyService.Policies.Add(new PolicyA()
+            {
+                NameOfInsuredObject = "Policy 2",
+                ValidFrom = DateTime.UtcNow,
+                ValidTill = DateTime.UtcNow.AddYears(1),
+                InsuredRisks = new List<Risk>()
+                {
+                    risk
+                }
+            });
         }
 
         [Fact]

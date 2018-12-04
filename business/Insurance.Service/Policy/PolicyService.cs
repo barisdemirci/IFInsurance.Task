@@ -9,45 +9,16 @@ namespace IFInsurance.Service.Policy
 {
     public class PolicyService : IPolicyService
     {
-        List<IPolicy> policies = null;
-        public PolicyService()
-        {
-            policies = new List<IPolicy>();
-            Risk risk = new Risk()
-            {
-                Name = "Risk 1",
-                YearlyPrice = 100
-            };
-            policies.Add(new PolicyA()
-            {
-                NameOfInsuredObject = "Policy 1",
-                ValidFrom = DateTime.UtcNow,
-                ValidTill = DateTime.UtcNow.AddYears(1),
-                InsuredRisks = new List<Risk>()
-                {
-                    risk
-                }
-            });
-            policies.Add(new PolicyA()
-            {
-                NameOfInsuredObject = "Policy 2",
-                ValidFrom = DateTime.UtcNow,
-                ValidTill = DateTime.UtcNow.AddYears(1),
-                InsuredRisks = new List<Risk>()
-                {
-                    risk
-                }
-            });
-        }
+        public List<IPolicy> Policies { get; set; }
 
         public IPolicy GetPolicy(string nameOfInsuredObject, DateTime effectiveDate)
         {
             if (string.IsNullOrEmpty(nameOfInsuredObject)) throw new ArgumentNullException(nameof(nameOfInsuredObject));
 
-            var policy = policies.FirstOrDefault(x => x.NameOfInsuredObject == nameOfInsuredObject &&
+            var policy = Policies.FirstOrDefault(x => x.NameOfInsuredObject == nameOfInsuredObject &&
                                              x.ValidFrom.Date <= effectiveDate.Date &&
                                              x.ValidTill.Date >= effectiveDate.Date);
-            if(policy == null)
+            if (policy == null)
             {
                 throw new PolicyNotFoundException("Policy not found");
             }
@@ -85,7 +56,7 @@ namespace IFInsurance.Service.Policy
         private bool IsPolicyExist(string nameOfInsuredObject, DateTime validFrom, DateTime validTill)
         {
             // In real life, following codes would be usually calling another service/repository
-            bool exist = policies.Exists(x => x.NameOfInsuredObject == nameOfInsuredObject &&
+            bool exist = Policies.Exists(x => x.NameOfInsuredObject == nameOfInsuredObject &&
                                              x.ValidFrom.Date <= validFrom.Date &&
                                              x.ValidTill.Date >= validTill.Date);
             return exist;

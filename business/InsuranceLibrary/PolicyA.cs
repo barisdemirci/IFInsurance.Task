@@ -17,9 +17,14 @@ namespace IFInsurance.Library
                 decimal premium = 0;
                 if (InsuredRisks != null && InsuredRisks.Any())
                 {
-                    premium = InsuredRisks.Sum(x => x.YearlyPrice);
+                    foreach (var risk in InsuredRisks)
+                    {
+                        decimal dailyPrice = risk.YearlyPrice / 365;
+                        TimeSpan timeSpan = ValidTill - ValidFrom;
+                        premium += dailyPrice * timeSpan.Days;
+                    }
                 }
-                return premium;
+                return Math.Round(premium, 2);
             }
         }
         public IList<Risk> InsuredRisks { get; set; }
