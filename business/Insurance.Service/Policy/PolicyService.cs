@@ -44,9 +44,15 @@ namespace IFInsurance.Service.Policy
         {
             if (string.IsNullOrEmpty(nameOfInsuredObject)) throw new ArgumentNullException(nameof(nameOfInsuredObject));
 
-            return policies.SingleOrDefault(x => x.NameOfInsuredObject == nameOfInsuredObject &&
-                                            x.ValidFrom.Date <= effectiveDate.Date &&
-                                            x.ValidTill.Date >= effectiveDate.Date);
+            var policy = policies.FirstOrDefault(x => x.NameOfInsuredObject == nameOfInsuredObject &&
+                                             x.ValidFrom.Date <= effectiveDate.Date &&
+                                             x.ValidTill.Date >= effectiveDate.Date);
+            if(policy == null)
+            {
+                throw new PolicyNotFoundException("Policy not found");
+            }
+
+            return policy;
         }
 
         public IPolicy SellPolicy(string nameOfInsuredObject, DateTime validFrom, short validMonths, IList<Risk> selectedRisks)

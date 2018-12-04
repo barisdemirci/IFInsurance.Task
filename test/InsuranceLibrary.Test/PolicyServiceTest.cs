@@ -33,6 +33,17 @@ namespace IFInsurance.Service.Test
         }
 
         [Fact]
+        public void GetPolicy_ThrowsPolicyNotFoundException()
+        {
+            // arrange
+            string nameOfInsuredObject = "Policy Not Found";
+            DateTime effectiveDate = DateTime.UtcNow;
+
+            // act && assert
+            Assert.Throws<PolicyNotFoundException>(() => policyService.GetPolicy(nameOfInsuredObject, effectiveDate));
+        }
+
+        [Fact]
         public void GetPolicy_ArgsOk_ReturnsPolicyObject()
         {
             // arrange
