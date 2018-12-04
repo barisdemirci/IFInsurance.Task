@@ -46,6 +46,11 @@ namespace IFInsurance.Service
             {
                 throw new RiskValidDateException("Valid from can not be in the past");
             }
+            bool isRiskAvailable = IsRiskAvailable(risk);
+            if (!isRiskAvailable)
+            {
+                throw new RiskNotAvailableException("Risk is not available");
+            }
 
             var policy = policyService.GetPolicy(nameOfInsuredObject, effectiveDate);
             policy.InsuredRisks.Add(risk);
@@ -73,6 +78,11 @@ namespace IFInsurance.Service
             if (string.IsNullOrEmpty(nameOfInsuredObject)) throw new ArgumentNullException(nameof(nameOfInsuredObject));
 
             return policyService.SellPolicy(nameOfInsuredObject, validFrom, validMonths, selectedRisks);
+        }
+
+        private bool IsRiskAvailable(Risk risk)
+        {
+            return AvailableRisks.Contains(risk);
         }
     }
 }

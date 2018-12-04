@@ -143,11 +143,28 @@ namespace IFInsurance.Service.Test
         }
 
         [Fact]
+        public void AddRisk_RiskIsNotAvailable_ThrowsException()
+        {
+            // arrange
+            string nameOfInsuranceObject = "name";
+            Risk risk = new Risk()
+            {
+                Name = "New Risk Not Available",
+                YearlyPrice = 50
+            };
+            DateTime validFrom = DateTime.UtcNow;
+            DateTime effectiveDate = DateTime.UtcNow;
+
+            // act && assert
+            Assert.Throws<RiskNotAvailableException>(() => insuranceCompanyService.AddRisk(nameOfInsuranceObject, risk, validFrom, effectiveDate));
+        }
+
+        [Fact]
         public void AddRisk_ArgsAreValid_Success()
         {
             // arrange
             string nameOfInsuranceObject = "Policy 1";
-            Risk newRisk = RiskBuilder.Build("New Risk", 50);
+            Risk newRisk = RiskBuilder.Build("Risk 1", 100);
             DateTime validFrom = DateTime.UtcNow;
             DateTime effectiveDate = DateTime.UtcNow;
             PolicyA policy = PolicyABuilder.Build(validFrom, effectiveDate, insuranceCompanyService.AvailableRisks.ToList());
