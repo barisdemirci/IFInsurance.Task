@@ -13,7 +13,7 @@ namespace IFInsurance.Service.Test
 {
     public class InsuranceCompanyServiceTest
     {
-        InsuranceCompanyService insuranceCompanyService;
+        private readonly InsuranceCompanyService insuranceCompanyService;
         private readonly IPolicyService policyService;
 
         public static IEnumerable<object[]> SellPolicyParameters
